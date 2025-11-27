@@ -1,0 +1,16 @@
+[project]
+name = "cellpose-vicky"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "cellpose[gui]>=4.0.7",
+    "glasbey>=0.3.0",
+    "matplotlib>=3.10.7",
+    "pandas>=2.3.3",
+    "scikit-image>=0.25.2",
+    "seaborn>=0.13.2",
+    "tifffile>=2025.10.16",
+    "tqdm>=4.67.1",
+]
