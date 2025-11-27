@@ -18,6 +18,7 @@ def main() -> None:
     ####### Parameters
     thickness = 5  # thickness for membrane mask dilation
     mode = "thick" # boundary mode: "thick", "inner"
+    channel=2 # 0 indexed, so the first channel is 0, second is 1, etc.
     ##################
 
     model = models.CellposeModel(gpu=True)
@@ -40,7 +41,7 @@ def main() -> None:
         print(f"masks[0].shape: {masks[0].shape}")
 
         mask = masks[0]
-        img = imgs[0][2]
+        img = imgs[0][channel]
 
         unique_vals = len(np.unique(mask)) - 1  # exclude background
         
