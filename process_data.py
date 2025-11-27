@@ -11,6 +11,7 @@ from tifffile import tifffile
 import tqdm
 from skimage.morphology import disk, binary_dilation
 from skimage.segmentation import find_boundaries
+import pandas as pd
 
 def main() -> None:
     ##################
@@ -18,8 +19,14 @@ def main() -> None:
     thickness = 5  # thickness for membrane mask dilation
     mode = "thick" # boundary mode: "thick", "inner"
     ##################
-    
+
     model = models.CellposeModel(gpu=True)
+
+    results = {
+        "file_name": [],
+        "num_cells": [],
+        "norm_intensity": [],
+    }
 
     # list all tif files in data
     data_path = Path('data')
@@ -35,8 +42,8 @@ def main() -> None:
         mask = masks[0]
         img = imgs[0][2]
 
-        unique_vals = len(np.unique(mask)) - 1
-
+        unique_vals = len(np.unique(mask)) - 1  # exclude background
+        
         output_path = Path('output')
         output_path.mkdir(exist_ok=True, parents=True)
 
@@ -75,17 +82,26 @@ def main() -> None:
         )
         tifffile.imwrite(output_path / f'{name}_membrane_mask.tiff', membrane_mask)
 
-        sum_intensity = np.sum(img[membrane_mask])
+        norm_intensity = np.sum(img[membrane_mask]) / np.sum(membrane_mask)
 
         # superimpose mambrane mask on raw image
         plt.imshow(img, cmap='gray')
         plt.imshow(membrane_mask, alpha=0.5, cmap='Reds')
-        plt.title(f'{name} - intensity {sum_intensity}')
+        plt.title(f'{name} - intensity {norm_intensity}')
         plt.axis('off')
         plt.tight_layout()
 
         plt.savefig(output_path / f'{name}_membrane_mask.png')
         plt.close()
+
+        # record results
+        results["file_name"].append(files[k].name)
+        results["num_cells"].append(unique_vals)
+        results["norm_intensity"].append(norm_intensity)
+
+    # save to csv
+    results_df = pd.DataFrame(results)
+    results_df.to_csv(output_path / 'summary_results.csv', index=False)
 
 if __name__ == '__main__':
     main()
